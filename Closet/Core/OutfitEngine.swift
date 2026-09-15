@@ -173,7 +173,7 @@ enum OutfitEngine {
         // carries about that much, so a lower target would flag every summer pick.
         let target = max(4, band.targetWarmth + occasion.warmthAdjustment)
         let drift = warmth - target
-        let temp = Int(weather.feelsLikeC.rounded())
+        let tempWithUnit = Units.temperatureWithSymbol(weather.feelsLikeC)
 
         let warmthPenalty = Double(abs(drift)) * 0.035 * occasion.weatherWeight
         score -= min(warmthPenalty, 0.30)
@@ -181,17 +181,31 @@ enum OutfitEngine {
         if abs(drift) <= 2 {
             reasons.append(.good(
                 "thermometer.medium",
-                "Right weight for \(temp)°, which is what it'll feel like out there."
+                "Right weight for \(tempWithUnit), which is what it'll feel like out there."
             ))
         } else if drift < -2 {
             reasons.append(.warn(
                 "thermometer.low",
-                "This runs light for \(temp)° — add a layer if you'll be outside a while."
+                "This runs light for \(tempWithUnit) — add a layer if you'll be outside a while."
             ))
         } else {
             reasons.append(.warn(
                 "thermometer.high",
-                "This runs warm for \(temp)° — you may want to lose a layer indoors."
+                "This runs warm for \(tempWithUnit) — you may want to lose a layer indoors."
+            ))
+        }
+
+        // --- Conditions worth flagging whatever you wear ---
+        // No outfit makes 40C safe, so say so rather than just scoring it.
+        if weather.feelsLikeC >= 35 {
+            reasons.append(.warn(
+                "sun.max.trianglebadge.exclamationmark",
+                "It's \(tempWithUnit) out there — keep to the shade where you can and take water with you."
+            ))
+        } else if weather.feelsLikeC <= -10 {
+            reasons.append(.warn(
+                "snowflake",
+                "At \(tempWithUnit), cover the skin you can — hands, ears and neck lose heat fastest."
             ))
         }
 
@@ -218,13 +232,13 @@ enum OutfitEngine {
             if items.contains(where: { $0.kind.blocksWind }) {
                 reasons.append(.good(
                     "wind",
-                    "Wind at \(Int(weather.windKph)) km/h — the outer layer cuts it."
+                    "Wind at \(Units.wind(weather.windKph)) — the outer layer cuts it."
                 ))
             } else {
                 score -= 0.04
                 reasons.append(.warn(
                     "wind",
-                    "It's blowing \(Int(weather.windKph)) km/h and nothing here blocks wind."
+                    "It's blowing \(Units.wind(weather.windKph)) and nothing here blocks wind."
                 ))
             }
         }
@@ -232,7 +246,7 @@ enum OutfitEngine {
         if weather.hasBigSwing && items.contains(where: { $0.slot == .outerwear }) {
             reasons.append(.info(
                 "arrow.up.arrow.down",
-                "Swings from \(Int(weather.lowC))° to \(Int(weather.highC))° today — a layer you can take off helps."
+                "Swings from \(Units.temperature(weather.lowC)) to \(Units.temperature(weather.highC)) today — a layer you can take off helps."
             ))
         }
 

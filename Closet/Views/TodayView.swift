@@ -5,6 +5,7 @@ import SwiftUI
 struct TodayView: View {
     @Environment(WardrobeStore.self) private var store
     @State private var selected: Occasion?
+    @State private var showingSettings = false
 
     private let columns = [
         GridItem(.flexible(), spacing: 14),
@@ -42,6 +43,14 @@ struct TodayView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Today")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showingSettings = true } label: {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingSettings) { SettingsView() }
             .refreshable { await store.refreshWeather() }
             .navigationDestination(item: $selected) { occasion in
                 OutfitResultView(occasion: occasion)
@@ -116,9 +125,9 @@ struct WeatherHeader: View {
                         .frame(width: 44)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("\(Int(store.weather.temperatureC.rounded()))° in \(store.weather.locationName)")
+                        Text("\(Units.temperature(store.weather.temperatureC, in: store.unitSystem)) in \(store.weather.locationName)")
                             .font(.headline)
-                        Text("\(store.weather.summary) · feels like \(Int(store.weather.feelsLikeC.rounded()))°")
+                        Text("\(store.weather.summary) · feels like \(Units.temperature(store.weather.feelsLikeC, in: store.unitSystem))")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -126,9 +135,9 @@ struct WeatherHeader: View {
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("H \(Int(store.weather.highC.rounded()))°")
+                        Text("H \(Units.temperature(store.weather.highC, in: store.unitSystem))")
                             .font(.caption)
-                        Text("L \(Int(store.weather.lowC.rounded()))°")
+                        Text("L \(Units.temperature(store.weather.lowC, in: store.unitSystem))")
                             .font(.caption)
                     }
                     .foregroundStyle(.secondary)
@@ -140,7 +149,7 @@ struct WeatherHeader: View {
                             Label("\(store.weather.precipitationChance)% rain", systemImage: "umbrella.fill")
                         }
                         if store.weather.isWindy {
-                            Label("\(Int(store.weather.windKph)) km/h wind", systemImage: "wind")
+                            Label("\(Units.wind(store.weather.windKph, in: store.unitSystem)) wind", systemImage: "wind")
                         }
                         Spacer()
                     }

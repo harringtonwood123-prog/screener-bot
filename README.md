@@ -48,7 +48,7 @@ a hoodie 1. Business casual wants 3–5, the gym wants 0–1. Gym and running
 additionally require kit you'd actually train in, so a denim jacket never shows
 up for a 5k.
 
-**2. Score against the weather.** Conditions come from
+**2. Score against the weather.** Your location goes to
 [Open-Meteo](https://open-meteo.com) — no API key, no account, no billing. The
 *feels-like* temperature drops into a band (freezing → hot), each band has a
 target warmth, and outfits are penalised for missing it. Sport targets a lower
@@ -56,7 +56,14 @@ number than the thermometer suggests, because you generate your own heat:
 dressing for a 12°C run means dressing like it's 20°C.
 
 Rain above 40% pushes water-resistant pieces up and sandals down. Wind above
-25 km/h rewards a layer that blocks it.
+25 km/h rewards a layer that blocks it. Above a 35°C feels-like — an Austin
+afternoon — it also says so, because no outfit makes that safe.
+
+**Units.** Everything is stored and reasoned about in metric; `Units` converts
+at the display layer only, so switching between °C and °F never changes a
+recommendation. It follows your region by default (Fahrenheit and mph in the
+US) and can be forced either way in Settings. An Austin user sees *"100° in
+Austin · feels like 106°"*; the engine sees 37.8°C and 41.1°C.
 
 **3. Score the colours.** Colours convert to hue/saturation/brightness, and each
 pair is classified: two neutrals, a neutral anchoring a colour, analogous,

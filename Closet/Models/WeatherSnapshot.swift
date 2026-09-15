@@ -1,7 +1,8 @@
 import Foundation
 
-/// Current conditions plus the day's range, in metric units internally.
-/// Display conversion to °F happens at the view layer.
+/// Current conditions plus the day's range, always in metric internally —
+/// `TemperatureBand` reasons in Celsius. `Units` converts for display only, so
+/// switching to Fahrenheit never changes which outfit is recommended.
 struct WeatherSnapshot: Codable, Equatable {
     var temperatureC: Double
     /// What it actually feels like with wind and humidity — this is what drives layering.

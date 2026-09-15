@@ -12,6 +12,13 @@ final class WardrobeStore {
     /// Set once the user has seen the sample wardrobe and either kept or cleared it.
     var hasOnboarded: Bool = false
 
+    /// Which units to display weather in. Views read this so that changing it
+    /// re-renders them; `Units` reads the same value back out of UserDefaults
+    /// for the engine's explanation strings, which have no view to observe.
+    var unitSystem: UnitSystem = Units.stored {
+        didSet { Units.stored = unitSystem }
+    }
+
     enum LoadState: Equatable {
         case idle
         case loading
