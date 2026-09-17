@@ -31,7 +31,7 @@ struct OutfitResultView: View {
             }
             .padding(16)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Theme.canvas)
         .navigationTitle(occasion.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear(perform: recompute)
@@ -50,24 +50,20 @@ struct OutfitResultView: View {
                 wornConfirmation = true
             } label: {
                 Label("I'm wearing this", systemImage: "checkmark.circle.fill")
-                    .frame(maxWidth: .infinity)
+                    .primaryAction()
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
 
             if let result, result.outfits.count > 1 {
                 Button {
                     withAnimation { index = (index + 1) % result.outfits.count }
                 } label: {
                     Label("Show me another", systemImage: "arrow.triangle.2.circlepath")
-                        .frame(maxWidth: .infinity)
+                        .secondaryAction()
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
 
                 Text("Option \(index + 1) of \(result.outfits.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(Theme.caption)
+                    .foregroundStyle(Theme.inkSoft)
             }
         }
     }
@@ -91,7 +87,8 @@ struct OutfitCard: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .firstTextBaseline) {
                 Text(outfit.verdict)
-                    .font(.title2.bold())
+                    .font(Theme.display(24))
+                    .foregroundStyle(Theme.ink)
                 Spacer()
                 ScorePill(score: outfit.score)
             }
@@ -101,8 +98,8 @@ struct OutfitCard: View {
                     VStack(spacing: 6) {
                         GarmentThumb(garment: garment, size: 74)
                         Text(garment.name)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                            .font(Theme.caption)
+                            .foregroundStyle(Theme.inkSoft)
                             .lineLimit(2)
                             .multilineTextAlignment(.center)
                     }
@@ -110,7 +107,7 @@ struct OutfitCard: View {
                 }
             }
         }
-        .card()
+        .surfaceCard()
     }
 }
 
@@ -119,20 +116,25 @@ struct ScorePill: View {
 
     private var tint: Color {
         switch score {
-        case 0.82...: return .green
-        case 0.62..<0.82: return .blue
-        default: return .orange
+        case 0.82...: return Theme.positive
+        case 0.62..<0.82: return Theme.teal
+        default: return Theme.caution
         }
     }
 
     var body: some View {
-        Text("\(Int((score * 100).rounded()))")
-            .font(.caption.bold().monospacedDigit())
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(tint.opacity(0.15))
-            .foregroundStyle(tint)
-            .clipShape(Capsule())
+        HStack(spacing: 5) {
+            Circle()
+                .fill(tint)
+                .frame(width: 7, height: 7)
+            Text("\(Int((score * 100).rounded()))")
+                .font(Theme.caption.weight(.bold).monospacedDigit())
+        }
+        .padding(.horizontal, 11)
+        .padding(.vertical, 6)
+        .background(tint.opacity(0.14))
+        .foregroundStyle(tint)
+        .clipShape(Capsule())
     }
 }
 
@@ -143,7 +145,7 @@ struct WhyCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Why this works")
-                .font(.headline)
+                .font(Theme.heading)
 
             ForEach(outfit.reasons) { reason in
                 HStack(alignment: .top, spacing: 12) {
@@ -151,7 +153,7 @@ struct WhyCard: View {
                         .foregroundStyle(reason.tone.color)
                         .frame(width: 22)
                     Text(reason.text)
-                        .font(.subheadline)
+                        .font(Theme.body)
                         .foregroundStyle(reason.tone == .info ? .secondary : .primary)
                         .fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
@@ -159,7 +161,7 @@ struct WhyCard: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .card()
+        .surfaceCard()
     }
 }
 
@@ -172,18 +174,18 @@ struct ShortfallCard: View {
         VStack(spacing: 14) {
             Image(systemName: "questionmark.square.dashed")
                 .font(.system(size: 44))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.inkSoft)
 
             Text("Not enough for \(occasion.title.lowercased()) yet")
-                .font(.headline)
+                .font(Theme.heading)
                 .multilineTextAlignment(.center)
 
             Text("You'll need \(shortfall.map { $0.title.lowercased() }.joined(separator: " and ")) that suit this. Add some in My Closet, or see suggestions in Add to Closet.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(Theme.body)
+                .foregroundStyle(Theme.inkSoft)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .card(padding: 24)
+        .surfaceCard(padding: Theme.Space.loose)
     }
 }

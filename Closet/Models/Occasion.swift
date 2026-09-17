@@ -46,11 +46,13 @@ enum Occasion: String, Codable, CaseIterable, Identifiable {
     }
 
     /// Accent colour as an RGB hex, used for the tile on the home screen.
+    /// Each has to stay legible against a near-black card in dark mode, which
+    /// rules out the obvious near-black choice for formal.
     var tintHex: String {
         switch self {
         case .casual: return "#3B82F6"
-        case .businessCasual: return "#0F766E"
-        case .formal: return "#1E293B"
+        case .businessCasual: return "#0D9488"
+        case .formal: return "#9F1239"
         case .gym: return "#EA580C"
         case .running: return "#16A34A"
         case .dateNight: return "#9333EA"

@@ -30,8 +30,8 @@ struct ShopView: View {
                         )
                     } else {
                         Text("Based on what you own, these would stretch your closet furthest.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .font(Theme.body)
+                            .foregroundStyle(Theme.inkSoft)
 
                         ForEach(currentGaps) { gap in
                             GapSection(gap: gap) { product in
@@ -44,7 +44,7 @@ struct ShopView: View {
                 }
                 .padding(16)
             }
-            .background(Color(.systemGroupedBackground))
+            .background(Theme.canvas)
             .navigationTitle("Add to Closet")
         }
     }
@@ -53,15 +53,15 @@ struct ShopView: View {
         VStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 46))
-                .foregroundStyle(.secondary)
-            Text(title).font(.headline)
+                .foregroundStyle(Theme.inkSoft)
+            Text(title).font(Theme.heading)
             Text(message)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(Theme.body)
+                .foregroundStyle(Theme.inkSoft)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .card(padding: 28)
+        .surfaceCard(padding: Theme.Space.section)
     }
 }
 
@@ -77,10 +77,10 @@ struct GapSection: View {
                     .frame(width: 24)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("A \(gap.kind.displayName.lowercased()) would help")
-                        .font(.headline)
+                        .font(Theme.heading)
                     Text(gap.rationale)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .font(Theme.body)
+                        .foregroundStyle(Theme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -101,7 +101,7 @@ struct GapSection: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .card()
+        .surfaceCard()
     }
 }
 
@@ -120,14 +120,14 @@ struct ProductCard: View {
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+                        .strokeBorder(Theme.hairline, lineWidth: 1)
                 )
 
             Text(product.brand)
                 .font(.caption2.bold())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.inkSoft)
             Text(product.title)
-                .font(.caption)
+                .font(Theme.caption)
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
                 .frame(height: 30, alignment: .top)
@@ -140,9 +140,9 @@ struct ProductCard: View {
                         .font(.system(size: 8, weight: .semibold))
                         .padding(.horizontal, 4)
                         .padding(.vertical, 2)
-                        .background(Color.secondary.opacity(0.16))
+                        .background(Theme.hairline)
                         .clipShape(RoundedRectangle(cornerRadius: 3))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.inkSoft)
                 }
             }
         }

@@ -14,18 +14,18 @@ struct AdSlotView: View {
                 .font(.system(size: 9, weight: .semibold))
                 .padding(.horizontal, 5)
                 .padding(.vertical, 2)
-                .background(Color.secondary.opacity(0.18))
+                .background(Theme.hairline)
                 .clipShape(RoundedRectangle(cornerRadius: 3))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Text("Ad slot")
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.inkSoft)
         }
         .frame(height: 50)
         .frame(maxWidth: .infinity)
         .padding(10)
-        .background(Color(.tertiarySystemFill))
+        .background(Theme.surfaceRaised)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }

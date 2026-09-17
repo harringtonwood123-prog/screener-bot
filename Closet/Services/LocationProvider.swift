@@ -1,10 +1,12 @@
 import Foundation
 import CoreLocation
 
-/// One-shot location lookup wrapped in async/await.
+/// Location access, wrapped in async/await.
 ///
-/// `CLLocationManager` can call its delegate more than once for a single request,
-/// so the continuation is cleared before it is resumed — resuming twice traps.
+/// Two separate awaits are supported — asking for permission, and asking for a
+/// fix — and each keeps its own continuation. `CLLocationManager` can call a
+/// delegate method more than once per request, so every continuation is cleared
+/// before it is resumed; resuming twice traps.
 final class LocationProvider: NSObject, CLLocationManagerDelegate {
 
     enum LocationError: LocalizedError {
@@ -22,7 +24,8 @@ final class LocationProvider: NSObject, CLLocationManagerDelegate {
     }
 
     private let manager = CLLocationManager()
-    private var continuation: CheckedContinuation<CLLocation, Error>?
+    private var locationContinuation: CheckedContinuation<CLLocation, Error>?
+    private var permissionContinuation: CheckedContinuation<CLAuthorizationStatus, Never>?
 
     override init() {
         super.init()
@@ -32,21 +35,45 @@ final class LocationProvider: NSObject, CLLocationManagerDelegate {
 
     var authorizationStatus: CLAuthorizationStatus { manager.authorizationStatus }
 
+    var hasBeenAsked: Bool { manager.authorizationStatus != .notDetermined }
+
+    var isAuthorized: Bool {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse: return true
+        default: return false
+        }
+    }
+
+    /// Shows the system permission prompt and waits for the answer.
+    /// Returns immediately if the user has already been asked once — iOS will
+    /// not show the prompt a second time.
+    func requestPermission() async -> CLAuthorizationStatus {
+        guard manager.authorizationStatus == .notDetermined else {
+            return manager.authorizationStatus
+        }
+        return await withCheckedContinuation { continuation in
+            self.permissionContinuation = continuation
+            manager.requestWhenInUseAuthorization()
+        }
+    }
+
     func requestLocation() async throws -> CLLocation {
         if manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted {
             throw LocationError.denied
         }
-        return try await withCheckedThrowingContinuation { continuation in
-            self.continuation = continuation
-            if manager.authorizationStatus == .notDetermined {
-                manager.requestWhenInUseAuthorization()
-            } else {
-                manager.requestLocation()
+        if manager.authorizationStatus == .notDetermined {
+            let status = await requestPermission()
+            guard status == .authorizedWhenInUse || status == .authorizedAlways else {
+                throw LocationError.denied
             }
+        }
+        return try await withCheckedThrowingContinuation { continuation in
+            self.locationContinuation = continuation
+            manager.requestLocation()
         }
     }
 
-    /// Reverse-geocode to something short enough for the header, e.g. "Manchester".
+    /// Reverse-geocode to something short enough for a header, e.g. "Austin".
     func placeName(for location: CLLocation) async -> String {
         let geocoder = CLGeocoder()
         guard let placemark = try? await geocoder.reverseGeocodeLocation(location).first else {
@@ -61,33 +88,36 @@ final class LocationProvider: NSObject, CLLocationManagerDelegate {
     // MARK: - CLLocationManagerDelegate
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse, .authorizedAlways:
-            manager.requestLocation()
-        case .denied, .restricted:
-            finish(.failure(LocationError.denied))
-        case .notDetermined:
-            break
-        @unknown default:
-            break
+        let status = manager.authorizationStatus
+        guard status != .notDetermined else { return }
+
+        // Answer whoever is waiting on the prompt.
+        if let continuation = permissionContinuation {
+            permissionContinuation = nil
+            continuation.resume(returning: status)
+        }
+
+        // A refusal also ends any in-flight location request.
+        if status == .denied || status == .restricted {
+            finishLocation(.failure(LocationError.denied))
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else {
-            finish(.failure(LocationError.unavailable))
+            finishLocation(.failure(LocationError.unavailable))
             return
         }
-        finish(.success(location))
+        finishLocation(.success(location))
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        finish(.failure(error))
+        finishLocation(.failure(error))
     }
 
-    private func finish(_ result: Result<CLLocation, Error>) {
-        guard let continuation else { return }
-        self.continuation = nil
+    private func finishLocation(_ result: Result<CLLocation, Error>) {
+        guard let continuation = locationContinuation else { return }
+        locationContinuation = nil
         continuation.resume(with: result)
     }
 }

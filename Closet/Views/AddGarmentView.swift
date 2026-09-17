@@ -46,14 +46,14 @@ struct AddGarmentView: View {
                             .frame(width: 52, height: 52)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .strokeBorder(Color.primary.opacity(0.12), lineWidth: 1)
+                                    .strokeBorder(Theme.hairline, lineWidth: 1)
                             )
                         VStack(alignment: .leading, spacing: 3) {
                             Text(HSBColor(hex: colorHex).name.capitalizedFirst)
-                                .font(.headline)
+                                .font(Theme.heading)
                             Text(didAutoDetect ? "Picked out from your photo" : "Tap to change")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .font(Theme.caption)
+                                .foregroundStyle(Theme.inkSoft)
                         }
                         Spacer()
                         ColorPicker("", selection: colorBinding, supportsOpacity: false)
@@ -64,8 +64,8 @@ struct AddGarmentView: View {
 
                 Section {
                     Text("We use the type and colour to work out what this goes with and how warm it is. You can change any of it later.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(Theme.caption)
+                        .foregroundStyle(Theme.inkSoft)
                 }
             }
             .navigationTitle("Add Item")
@@ -108,14 +108,14 @@ struct AddGarmentView: View {
                         .resizable()
                         .scaledToFill()
                 } else {
-                    Color(.tertiarySystemFill)
+                    Theme.surfaceRaised
                     VStack(spacing: 8) {
                         Image(systemName: "tshirt")
                             .font(.system(size: 38))
                         Text("Add a photo (optional)")
                             .font(.footnote)
                     }
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.inkSoft)
                 }
 
                 if isScanning {
@@ -123,7 +123,7 @@ struct AddGarmentView: View {
                     VStack(spacing: 8) {
                         ProgressView().tint(.white)
                         Text("Reading the colour…")
-                            .font(.caption)
+                            .font(Theme.caption)
                             .foregroundStyle(.white)
                     }
                 }

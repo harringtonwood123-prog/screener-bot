@@ -21,30 +21,12 @@ extension HSBColor {
     }
 }
 
-/// The rounded panel used throughout the app.
-struct CardBackground: ViewModifier {
-    var padding: CGFloat = 16
-
-    func body(content: Content) -> some View {
-        content
-            .padding(padding)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-    }
-}
-
-extension View {
-    func card(padding: CGFloat = 16) -> some View {
-        modifier(CardBackground(padding: padding))
-    }
-}
-
 extension ReasonTone {
     var color: Color {
         switch self {
-        case .positive: return .green
-        case .caution: return .orange
-        case .info: return .secondary
+        case .positive: return Theme.positive
+        case .caution: return Theme.caution
+        case .info: return Theme.inkFaint
         }
     }
 }

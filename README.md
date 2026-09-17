@@ -23,6 +23,21 @@ open Closet.xcodeproj
 
 Then pick a simulator (or your iPhone) and hit **Run**.
 
+### First run
+
+The app opens onto a four-step onboarding: welcome, sign-up, location
+permission, then a choice of starting closet. **Sign-up is required** — name and
+email, before anything else, as specified.
+
+Worth knowing before you submit to review: App Store guideline 5.1.1(v) says an
+app may not require an account for features that don't need one, and everything
+here runs on-device with no server. A hard sign-up wall is a plausible rejection.
+To make the step skippable, add a button to `SignUpStep` that calls
+`store.signUp(name: "", email: "")`. To make it a *real* account you'd need a
+backend — at which point Sign in with Apple becomes mandatory alongside any other
+social login, and the privacy labels change, because today nothing leaves the
+device.
+
 Two things to know on first launch:
 
 - **Weather needs location.** Allow it when asked. If you deny it, the app still
@@ -36,6 +51,22 @@ before photographing anything.
 
 > If the project file ever gives you trouble, there's an [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 > definition as a fallback: `brew install xcodegen && xcodegen generate`.
+
+## Look
+
+`Closet/Design/Theme.swift` holds the whole visual language: a warm off-white
+canvas in light and a deep indigo-black in dark, an indigo-to-violet brand
+gradient echoing the icon, SF Rounded throughout, and semantic colour tokens
+rather than raw system greys. Light and dark are declared as explicit pairs in
+one file, so changing the palette means editing one place.
+
+The mark — three overlapping discs — is the app's actual subject: how colours
+sit against each other. It exists twice, as the 1024px icon and as `LogoMark`,
+a drawn SwiftUI version that stays crisp at any size.
+
+One thing the palette work caught: the Formal tile was a near-black slate, which
+vanished against the dark-mode card. Every occasion tint is now contrast-checked
+against both card backgrounds.
 
 ## How it decides
 
@@ -90,8 +121,10 @@ Closet/
 ├── Core/          HSBColor, ColorTheory, OutfitEngine, WardrobeGaps
 ├── Services/      WeatherService (Open-Meteo), LocationProvider, GarmentScanner (Vision)
 ├── Store/         WardrobeStore (JSON persistence), ImageStore, SampleData
+├── Design/        Theme (palette, metrics, type, surfaces)
 ├── Monetization/  PartnerCatalog
 └── Views/         TodayView, OutfitResultView, ClosetView, AddGarmentView, ShopView
+    └── Onboarding/  Welcome, SignUp, Location, starting wardrobe
 ```
 
 `GarmentKind.swift` holds the domain knowledge: 40 garment types, each with its
@@ -143,7 +176,7 @@ realistic wardrobe. That caught six real bugs that would otherwise have shipped:
   was below anything physically achievable
 
 Those checks now live in the repo as a real test suite rather than as throwaway
-Python. `ClosetTests/` has 52 tests, and each bug above has one named after it,
+Python. `ClosetTests/` has 58 tests, and each bug above has one named after it,
 so none of them can come back quietly. Run them with Cmd-U, or:
 
 ```bash
@@ -151,8 +184,8 @@ xcodebuild test -scheme Closet -destination 'platform=iOS Simulator,name=iPhone 
 ```
 
 The suite covers colour naming and harmony, the recommender across six
-occasions and six temperature bands, unit conversion, gap analysis, and
-round-tripping the wardrobe to disk. It needs no network and no location: all
+occasions and six temperature bands, unit conversion, gap analysis, sign-up
+validation and the onboarding gate, and round-tripping the wardrobe to disk. It needs no network and no location: all
 weather is constructed in-process.
 
 Worth knowing: the tests were written without ever being run, same as the rest.

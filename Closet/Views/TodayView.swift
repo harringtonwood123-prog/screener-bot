@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The home screen: today's weather, then one big button per occasion.
+/// Home. Today's conditions, then one card per occasion.
 /// Two taps from opening the app to a recommendation.
 struct TodayView: View {
     @Environment(WardrobeStore.self) private var store
@@ -8,29 +8,28 @@ struct TodayView: View {
     @State private var showingSettings = false
 
     private let columns = [
-        GridItem(.flexible(), spacing: 14),
-        GridItem(.flexible(), spacing: 14)
+        GridItem(.flexible(), spacing: Theme.Space.snug),
+        GridItem(.flexible(), spacing: Theme.Space.snug)
     ]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
+                VStack(spacing: Theme.Space.loose) {
                     WeatherHeader()
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: Theme.Space.snug) {
                         Text("What are you doing?")
-                            .font(.title3.bold())
+                            .font(Theme.title(20))
+                            .foregroundStyle(Theme.ink)
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                        LazyVGrid(columns: columns, spacing: 14) {
+                        LazyVGrid(columns: columns, spacing: Theme.Space.snug) {
                             ForEach(Occasion.allCases) { occasion in
-                                Button {
-                                    selected = occasion
-                                } label: {
+                                Button { selected = occasion } label: {
                                     OccasionTile(occasion: occasion)
                                 }
-                                .buttonStyle(.plain)
+                                .buttonStyle(PressableStyle())
                             }
                         }
                     }
@@ -39,14 +38,15 @@ struct TodayView: View {
                         EmptyClosetPrompt()
                     }
                 }
-                .padding(16)
+                .padding(Theme.Space.normal)
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Today")
+            .background(Theme.canvas)
+            .navigationTitle(greeting)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingSettings = true } label: {
-                        Label("Settings", systemImage: "gearshape")
+                        Image(systemName: "gearshape.fill")
+                            .foregroundStyle(Theme.inkSoft)
                     }
                 }
             }
@@ -57,125 +57,174 @@ struct TodayView: View {
             }
         }
     }
+
+    private var greeting: String {
+        guard let name = store.profile?.firstName, !name.isEmpty else { return "Today" }
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return "Morning, \(name)"
+        case 12..<18: return "Afternoon, \(name)"
+        default: return "Evening, \(name)"
+        }
+    }
+}
+
+/// Gives cards a slight press-down, which makes the grid feel like buttons.
+struct PressableStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.snappy(duration: 0.18), value: configuration.isPressed)
+    }
 }
 
 struct OccasionTile: View {
     let occasion: Occasion
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Theme.Space.snug) {
             Image(systemName: occasion.symbol)
-                .font(.title2)
+                .font(.system(size: 19, weight: .semibold))
                 .foregroundStyle(.white)
-                .frame(width: 44, height: 44)
-                .background(Color(hex: occasion.tintHex).opacity(0.9))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .frame(width: 42, height: 42)
+                .background(
+                    LinearGradient(
+                        colors: [Color(hex: occasion.tintHex), Color(hex: occasion.tintHex).opacity(0.72)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous))
+
+            Spacer(minLength: 0)
 
             Text(occasion.title)
-                .font(.headline)
-                .foregroundStyle(.primary)
+                .font(Theme.heading)
+                .foregroundStyle(Theme.ink)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
 
             Text(occasion.subtitle)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(Theme.caption)
+                .foregroundStyle(Theme.inkSoft)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, minHeight: 148, alignment: .topLeading)
-        .card()
+        .frame(maxWidth: .infinity, minHeight: 152, alignment: .topLeading)
+        .surfaceCard()
     }
 }
 
-/// Weather strip at the top of the home screen.
+/// Conditions strip. On a brand gradient so the top of the app has some colour.
 struct WeatherHeader: View {
     @Environment(WardrobeStore.self) private var store
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Theme.Space.snug) {
             switch store.weatherState {
             case .loading, .idle:
-                HStack(spacing: 10) {
-                    ProgressView()
+                HStack(spacing: Theme.Space.snug) {
+                    ProgressView().tint(.white)
                     Text("Checking your weather…")
-                        .foregroundStyle(.secondary)
+                        .font(Theme.body)
+                        .foregroundStyle(.white.opacity(0.9))
+                    Spacer()
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
 
             case .failed(let message):
-                HStack(alignment: .top, spacing: 10) {
+                HStack(alignment: .top, spacing: Theme.Space.snug) {
                     Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.white)
                     VStack(alignment: .leading, spacing: 4) {
                         Text(message)
-                            .font(.subheadline)
-                        Text("Using mild conditions for now — recommendations will still work.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(Theme.body)
+                            .foregroundStyle(.white)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text("Using mild conditions for now — recommendations still work.")
+                            .font(Theme.caption)
+                            .foregroundStyle(.white.opacity(0.75))
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
                 }
 
             case .loaded:
-                HStack(spacing: 14) {
+                HStack(spacing: Theme.Space.normal) {
                     Image(systemName: store.weather.symbol)
-                        .font(.system(size: 34))
-                        .foregroundStyle(.tint)
-                        .frame(width: 44)
+                        .font(.system(size: 36))
+                        .foregroundStyle(.white)
+                        .symbolRenderingMode(.hierarchical)
+                        .frame(width: 46)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("\(Units.temperature(store.weather.temperatureC, in: store.unitSystem)) in \(store.weather.locationName)")
-                            .font(.headline)
-                        Text("\(store.weather.summary) · feels like \(Units.temperature(store.weather.feelsLikeC, in: store.unitSystem))")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                        Text(Units.temperature(store.weather.temperatureC, in: store.unitSystem))
+                            .font(Theme.display(30))
+                            .foregroundStyle(.white)
+                        Text(store.weather.locationName)
+                            .font(Theme.caption)
+                            .foregroundStyle(.white.opacity(0.8))
                     }
 
                     Spacer()
 
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("H \(Units.temperature(store.weather.highC, in: store.unitSystem))")
-                            .font(.caption)
-                        Text("L \(Units.temperature(store.weather.lowC, in: store.unitSystem))")
-                            .font(.caption)
+                    VStack(alignment: .trailing, spacing: 3) {
+                        Text(store.weather.summary)
+                            .font(Theme.body.weight(.medium))
+                            .foregroundStyle(.white)
+                        Text("Feels \(Units.temperature(store.weather.feelsLikeC, in: store.unitSystem))")
+                            .font(Theme.caption)
+                            .foregroundStyle(.white.opacity(0.8))
+                        Text("H \(Units.temperature(store.weather.highC, in: store.unitSystem))  L \(Units.temperature(store.weather.lowC, in: store.unitSystem))")
+                            .font(Theme.caption)
+                            .foregroundStyle(.white.opacity(0.7))
                     }
-                    .foregroundStyle(.secondary)
                 }
 
                 if store.weather.expectsPrecipitation || store.weather.isWindy {
-                    HStack(spacing: 14) {
+                    HStack(spacing: Theme.Space.normal) {
                         if store.weather.expectsPrecipitation {
-                            Label("\(store.weather.precipitationChance)% rain", systemImage: "umbrella.fill")
+                            chip("umbrella.fill", "\(store.weather.precipitationChance)% rain")
                         }
                         if store.weather.isWindy {
-                            Label("\(Units.wind(store.weather.windKph, in: store.unitSystem)) wind", systemImage: "wind")
+                            chip("wind", Units.wind(store.weather.windKph, in: store.unitSystem))
                         }
                         Spacer()
                     }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
                 }
             }
         }
-        .card()
+        .padding(Theme.Space.normal)
+        .frame(maxWidth: .infinity)
+        .background(Theme.brandGradient)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous))
+        .shadow(color: Theme.indigo.opacity(0.25), radius: 14, y: 6)
+    }
+
+    private func chip(_ symbol: String, _ text: String) -> some View {
+        Label(text, systemImage: symbol)
+            .font(Theme.caption.weight(.medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(.white.opacity(0.18))
+            .clipShape(Capsule())
     }
 }
 
 struct EmptyClosetPrompt: View {
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: Theme.Space.snug) {
             Image(systemName: "camera.viewfinder")
-                .font(.title)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 32))
+                .foregroundStyle(Theme.accent)
             Text("Your closet is empty")
-                .font(.headline)
-            Text("Add a few clothes in the My Closet tab and we can start recommending outfits.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(Theme.heading)
+                .foregroundStyle(Theme.ink)
+            Text("Add a few clothes in My Closet and we can start recommending outfits.")
+                .font(Theme.caption)
+                .foregroundStyle(Theme.inkSoft)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .card(padding: 24)
+        .surfaceCard(padding: Theme.Space.loose)
     }
 }

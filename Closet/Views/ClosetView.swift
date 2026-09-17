@@ -21,15 +21,15 @@ struct ClosetView: View {
                                 if !items.isEmpty {
                                     VStack(alignment: .leading, spacing: 10) {
                                         Text("\(slot.title) · \(items.count)")
-                                            .font(.headline)
+                                            .font(Theme.heading)
                                         LazyVGrid(columns: columns, spacing: 12) {
                                             ForEach(items) { garment in
                                                 Button { editing = garment } label: {
                                                     VStack(spacing: 6) {
                                                         GarmentThumb(garment: garment, size: 96)
                                                         Text(garment.name)
-                                                            .font(.caption2)
-                                                            .foregroundStyle(.secondary)
+                                                            .font(Theme.caption)
+                                                            .foregroundStyle(Theme.inkSoft)
                                                             .lineLimit(2)
                                                             .multilineTextAlignment(.center)
                                                     }
@@ -43,7 +43,7 @@ struct ClosetView: View {
                         }
                         .padding(16)
                     }
-                    .background(Color(.systemGroupedBackground))
+                    .background(Theme.canvas)
                 }
             }
             .navigationTitle("My Closet")
@@ -65,12 +65,12 @@ struct ClosetView: View {
         VStack(spacing: 16) {
             Image(systemName: "square.grid.2x2")
                 .font(.system(size: 52))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.inkSoft)
             Text("Nothing here yet")
-                .font(.title3.bold())
+                .font(Theme.title(20))
             Text("Scan a piece of clothing and we'll work out what it is and what colour it is.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(Theme.body)
+                .foregroundStyle(Theme.inkSoft)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             Button {
@@ -82,7 +82,7 @@ struct ClosetView: View {
             .controlSize(.large)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
+        .background(Theme.canvas)
     }
 }
 

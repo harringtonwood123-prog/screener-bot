@@ -155,3 +155,73 @@ final class WardrobeTests: XCTestCase {
         XCTAssertTrue(decoded.isWaterResistant)
     }
 }
+
+/// Sign-up validation and the onboarding gate.
+final class ProfileTests: XCTestCase {
+
+    func testPlausibleEmailsAreAccepted() {
+        for email in ["a@b.co", "alex@example.com", "alex.morgan+tag@sub.example.co.uk"] {
+            XCTAssertTrue(UserProfile.isPlausibleEmail(email), "\(email) should be accepted")
+        }
+    }
+
+    func testImplausibleEmailsAreRejected() {
+        for email in ["", "alex", "alex@", "@example.com", "alex@example",
+                      "alex example@x.com", "alex@.com", "alex@example."] {
+            XCTAssertFalse(UserProfile.isPlausibleEmail(email), "\(email) should be rejected")
+        }
+    }
+
+    func testNameNeedsTwoCharacters() {
+        XCTAssertTrue(UserProfile.isUsableName("Al"))
+        XCTAssertTrue(UserProfile.isUsableName("Alex Morgan"))
+        XCTAssertFalse(UserProfile.isUsableName(""))
+        XCTAssertFalse(UserProfile.isUsableName(" "))
+        XCTAssertFalse(UserProfile.isUsableName("A"))
+    }
+
+    func testFirstNameIsTakenFromTheFullName() {
+        let profile = UserProfile(name: "Alex Morgan", email: "a@b.co", signedUpAt: Date())
+        XCTAssertEqual(profile.firstName, "Alex")
+        let single = UserProfile(name: "Alex", email: "a@b.co", signedUpAt: Date())
+        XCTAssertEqual(single.firstName, "Alex")
+    }
+
+    func testOnboardingRunsUntilSignUpAndClosetChoiceAreBothDone() {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("profile-test-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let store = WardrobeStore(fileURL: url)
+        XCTAssertTrue(store.needsOnboarding, "a fresh install should onboard")
+
+        store.signUp(name: "Alex Morgan", email: "  ALEX@Example.com ")
+        XCTAssertEqual(store.profile?.email, "alex@example.com", "email should be trimmed and lowercased")
+        XCTAssertTrue(store.needsOnboarding, "signing up alone shouldn't finish onboarding")
+
+        store.hasOnboarded = true
+        store.save()
+        XCTAssertFalse(store.needsOnboarding)
+
+        // And it survives a restart.
+        let reopened = WardrobeStore(fileURL: url)
+        XCTAssertFalse(reopened.needsOnboarding)
+        XCTAssertEqual(reopened.profile?.name, "Alex Morgan")
+    }
+
+    func testSigningOutSendsTheUserBackToOnboarding() {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("signout-test-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let store = WardrobeStore(fileURL: url)
+        store.signUp(name: "Alex", email: "alex@example.com")
+        store.hasOnboarded = true
+        store.add(Garment(kind: .tShirt, name: "Kept tee", colorHex: "#FFFFFF"))
+
+        store.signOut()
+        XCTAssertTrue(store.needsOnboarding)
+        XCTAssertNil(store.profile)
+        XCTAssertEqual(store.garments.count, 1, "signing out shouldn't throw away the clothes")
+    }
+}

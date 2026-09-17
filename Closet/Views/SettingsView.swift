@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
 
     @State private var confirmingClear = false
+    @State private var confirmingSignOut = false
 
     var body: some View {
         // `@Bindable` is what lets a Picker write back to an @Observable model
@@ -15,6 +16,26 @@ struct SettingsView: View {
 
         NavigationStack {
             Form {
+                if let profile = store.profile {
+                    Section {
+                        HStack(spacing: Theme.Space.normal) {
+                            LogoMark(size: 52)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(profile.name)
+                                    .font(Theme.heading)
+                                    .foregroundStyle(Theme.ink)
+                                Text(profile.email)
+                                    .font(Theme.caption)
+                                    .foregroundStyle(Theme.inkSoft)
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.vertical, 4)
+                    } footer: {
+                        Text("Stored on this iPhone only. There is no server, so nothing has been uploaded.")
+                    }
+                }
+
                 Section {
                     Picker("Units", selection: $store.unitSystem) {
                         ForEach(UnitSystem.allCases) { system in
@@ -74,6 +95,14 @@ struct SettingsView: View {
                 } header: {
                     Text("Closet")
                 }
+
+                Section {
+                    Button("Sign out", role: .destructive) {
+                        confirmingSignOut = true
+                    }
+                } footer: {
+                    Text("Signing out clears your name and email from this device. Your clothes stay put.")
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -91,6 +120,19 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("This can't be undone.")
+            }
+            .confirmationDialog(
+                "Sign out?",
+                isPresented: $confirmingSignOut,
+                titleVisibility: .visible
+            ) {
+                Button("Sign out", role: .destructive) {
+                    store.signOut()
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("You'll be asked to sign up again next time you open the app.")
             }
         }
     }

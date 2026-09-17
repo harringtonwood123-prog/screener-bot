@@ -7,6 +7,8 @@ import Observation
 final class WardrobeStore {
 
     private(set) var garments: [Garment] = []
+    /// Nil until the user signs up. Drives whether onboarding is shown.
+    private(set) var profile: UserProfile?
     private(set) var weather: WeatherSnapshot = .placeholder
     var weatherState: LoadState = .idle
     /// Set once the user has seen the sample wardrobe and either kept or cleared it.
@@ -26,13 +28,41 @@ final class WardrobeStore {
         case failed(String)
     }
 
-    private let locationProvider = LocationProvider()
+    let locationProvider = LocationProvider()
     private let fileURL: URL
 
     init(fileURL: URL? = nil) {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
         self.fileURL = fileURL ?? base.appendingPathComponent("wardrobe.json")
         load()
+    }
+
+    /// Onboarding runs until the user has signed up *and* chosen a starting
+    /// closet, so a half-finished first run resumes rather than being skipped.
+    var needsOnboarding: Bool { profile == nil || !hasOnboarded }
+
+    // MARK: - Account
+
+    func signUp(name: String, email: String) {
+        profile = UserProfile(
+            name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+            email: email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+            signedUpAt: Date()
+        )
+        save()
+    }
+
+    func signOut() {
+        profile = nil
+        hasOnboarded = false
+        save()
+    }
+
+    /// Shows the system location prompt. Returns whether we ended up with access.
+    @MainActor
+    func requestLocationPermission() async -> Bool {
+        _ = await locationProvider.requestPermission()
+        return locationProvider.isAuthorized
     }
 
     // MARK: - Wardrobe
@@ -117,6 +147,8 @@ final class WardrobeStore {
     private struct Persisted: Codable {
         var garments: [Garment]
         var hasOnboarded: Bool
+        /// Optional so that a file written before sign-up existed still decodes.
+        var profile: UserProfile?
     }
 
     private func load() {
@@ -124,10 +156,11 @@ final class WardrobeStore {
               let decoded = try? JSONDecoder().decode(Persisted.self, from: data) else { return }
         garments = decoded.garments
         hasOnboarded = decoded.hasOnboarded
+        profile = decoded.profile
     }
 
     func save() {
-        let payload = Persisted(garments: garments, hasOnboarded: hasOnboarded)
+        let payload = Persisted(garments: garments, hasOnboarded: hasOnboarded, profile: profile)
         guard let data = try? JSONEncoder().encode(payload) else { return }
         try? data.write(to: fileURL, options: .atomic)
     }
