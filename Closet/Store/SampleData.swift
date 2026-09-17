@@ -27,6 +27,7 @@ enum SampleData {
             Garment(kind: .boots, name: "Brown boots", colorHex: "#5C4033"),
 
             Garment(kind: .rainJacket, name: "Navy rain jacket", colorHex: "#1F3A5F"),
+            Garment(kind: .pufferJacket, name: "Black puffer", colorHex: "#111111"),
             Garment(kind: .blazer, name: "Navy blazer", colorHex: "#1A2B4C"),
             Garment(kind: .denimJacket, name: "Denim jacket", colorHex: "#4A6FA5")
         ]

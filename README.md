@@ -142,7 +142,23 @@ realistic wardrobe. That caught six real bugs that would otherwise have shipped:
 - every hot-weather sport outfit warned "too warm", because the target warmth
   was below anything physically achievable
 
-The Python mirrors live in the commit history rather than the repo; they were
-scaffolding, not something to maintain alongside the Swift.
+Those checks now live in the repo as a real test suite rather than as throwaway
+Python. `ClosetTests/` has 52 tests, and each bug above has one named after it,
+so none of them can come back quietly. Run them with Cmd-U, or:
 
-Not yet built: unit tests, iCloud sync, outfit history, multi-day planning.
+```bash
+xcodebuild test -scheme Closet -destination 'platform=iOS Simulator,name=iPhone 16'
+```
+
+The suite covers colour naming and harmony, the recommender across six
+occasions and six temperature bands, unit conversion, gap analysis, and
+round-tripping the wardrobe to disk. It needs no network and no location: all
+weather is constructed in-process.
+
+Worth knowing: the tests were written without ever being run, same as the rest.
+Their *assertions* were checked against a Python model of the engine, so the
+expected values are right, but expect to fix compile errors in the test target
+too. If it gets in your way, the `ClosetTests` target can be deleted from the
+project without touching the app.
+
+Not yet built: iCloud sync, outfit history, multi-day planning.

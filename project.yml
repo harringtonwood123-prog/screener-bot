@@ -40,3 +40,14 @@ targets:
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: >-
           Closet checks the weather where you are so it can recommend clothes that
           suit the conditions.
+  ClosetTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ClosetTests
+    dependencies:
+      - target: Closet
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.caito360.closetTests
+        GENERATE_INFOPLIST_FILE: true

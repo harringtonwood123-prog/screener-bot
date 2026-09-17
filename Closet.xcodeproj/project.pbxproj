@@ -6,16 +6,35 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		C105E7000000000000000019 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C105E7000000000000000005 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C105E7000000000000000004;
+			remoteInfo = Closet;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		C105E7000000000000000000 /* Closet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Closet.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C105E700000000000000000F /* ClosetTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClosetTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C105E7000000000000000001 /* Closet */ = {isa = PBXFileSystemSynchronizedRootGroup; path = Closet; sourceTree = "<group>"; };
+		C105E7000000000000000010 /* ClosetTests */ = {isa = PBXFileSystemSynchronizedRootGroup; path = ClosetTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		C105E7000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C105E7000000000000000013 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,6 +48,7 @@
 			isa = PBXGroup;
 			children = (
 				C105E7000000000000000001 /* Closet */,
+				C105E7000000000000000010 /* ClosetTests */,
 				C105E7000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -37,6 +57,7 @@
 			isa = PBXGroup;
 			children = (
 				C105E7000000000000000000 /* Closet.app */,
+				C105E700000000000000000F /* ClosetTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -64,6 +85,27 @@
 			productReference = C105E7000000000000000000 /* Closet.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C105E7000000000000000011 /* ClosetTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C105E7000000000000000015 /* Build configuration list for PBXNativeTarget "ClosetTests" */;
+			buildPhases = (
+				C105E7000000000000000012 /* Sources */,
+				C105E7000000000000000013 /* Frameworks */,
+				C105E7000000000000000014 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C105E7000000000000000018 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C105E7000000000000000010 /* ClosetTests */,
+			);
+			name = ClosetTests;
+			productName = ClosetTests;
+			productReference = C105E700000000000000000F /* ClosetTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -76,6 +118,10 @@
 				TargetAttributes = {
 					C105E7000000000000000004 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					C105E7000000000000000011 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = C105E7000000000000000004;
 					};
 				};
 			};
@@ -94,12 +140,20 @@
 			projectRoot = "";
 			targets = (
 				C105E7000000000000000004 /* Closet */,
+				C105E7000000000000000011 /* ClosetTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		C105E7000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C105E7000000000000000014 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -116,7 +170,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C105E7000000000000000012 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C105E7000000000000000018 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C105E7000000000000000004 /* Closet */;
+			targetProxy = C105E7000000000000000019 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C105E700000000000000000D /* Debug */ = {
@@ -240,6 +309,40 @@
 			};
 			name = Release;
 		};
+		C105E7000000000000000016 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.caito360.closetTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Closet.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Closet";
+			};
+			name = Debug;
+		};
+		C105E7000000000000000017 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.caito360.closetTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Closet.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Closet";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -257,6 +360,15 @@
 			buildConfigurations = (
 				C105E700000000000000000B /* Debug */,
 				C105E700000000000000000C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C105E7000000000000000015 /* Build configuration list for PBXNativeTarget "ClosetTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C105E7000000000000000016 /* Debug */,
+				C105E7000000000000000017 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
